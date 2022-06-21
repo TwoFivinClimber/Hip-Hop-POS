@@ -10,7 +10,7 @@ const orderDetails = (orderId) => {
     console.warn(itemsArr);
     if (itemsArr.length) {
       itemsArr.forEach((item) => {
-        total += item.price;
+        total += Number(item.price);
         content += ` <div class="card">
       <div class="card-body">
         <h5 class="card-title">${item.item}</h5>
