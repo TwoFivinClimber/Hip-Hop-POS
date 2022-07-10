@@ -10,9 +10,7 @@ const orderDetails = (orderId) => {
     if (itemsArr.length) {
       itemsArr.forEach((item) => {
         total += Number(item.price);
-        content += ` <div class="card">
-        content += ` <div class="order-details-card card">
-
+        content += `<div class="order-details-card card">
       <div class="card-body">
         <h5 class="card-title">${item.item}</h5>
         <h6 class="card-subtitle mb-2">$${item.price}</h6>
@@ -37,5 +35,4 @@ const orderDetails = (orderId) => {
     }
   });
 };
-
 export default orderDetails;
