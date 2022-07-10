@@ -1,7 +1,15 @@
-import { createOrder, editOrder, getOrders } from '../../../api/orderData';
+import {
+  createOrder,
+  editOrder,
+  getClosedOrders,
+  getOrders,
+  getSingleOrder
+} from '../../../api/orderData';
 import { showOrders } from '../pages/viewOrders';
-import { createItem } from '../../../api/itemData';
+import { createItem, updateItem } from '../../../api/itemData';
 import orderDetails from '../pages/orderDetails';
+import revenue from '../pages/revenue';
+import { getRevenue, postRevenue } from '../../../api/revenueData';
 
 const formEvents = (uid) => {
   document.querySelector('#form-container').addEventListener('submit', (e) => {
@@ -16,15 +24,27 @@ const formEvents = (uid) => {
       createItem(itemObj).then(() => orderDetails(orderId));
     }
 
+    if (e.target.id.includes('update-item')) {
+      const [, firebaseKey, orderId] = e.target.id.split('--');
+      console.warn(orderId);
+      const itemObj = {
+        item: document.querySelector('#item-name').value,
+        price: document.querySelector('#item-price').value,
+      };
+      updateItem(itemObj, firebaseKey).then(() => {
+        orderDetails(orderId);
+      });
+    }
+
     if (e.target.id.includes('create-order')) {
       const orderObj = {
         name: document.querySelector('#name').value,
         email: document.querySelector('#email').value,
         phone: document.querySelector('#phone').value,
         type: document.querySelector('#orderType').value,
+        status: 'open',
         uid
       };
-      console.warn(orderObj);
       createOrder(orderObj, uid).then((orderArray) => {
         showOrders(orderArray);
       });
@@ -44,7 +64,35 @@ const formEvents = (uid) => {
         getOrders(uid).then((orderArray) => showOrders(orderArray));
       });
     }
+
+    if (e.target.id.includes('submitPayment')) {
+      const [, orderId, total] = e.target.id.split('--');
+      let singleOrderObj;
+      getSingleOrder(orderId).then((response) => {
+        singleOrderObj = response;
+        const revenueObj = {
+          payment: document.querySelector('#payType').value,
+          tip: Number(document.querySelector('#tipAmount').value).toFixed(2),
+          date: Date.now(),
+          status: 'closed',
+          total: (Number(total) + Number(document.querySelector('#tipAmount').value)).toFixed(2),
+          orderType: singleOrderObj.type,
+          uid
+        };
+        postRevenue(revenueObj, uid).then(() => getRevenue(uid)).then((revenueArray) => revenue(revenueArray)).then(() => getClosedOrders(orderId));
+      });
+    }
   });
 };
 
-export default formEvents;
+const cancelEvent = () => {
+  document.querySelector('#cancel-div').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (e.target.id.includes('cancel')) {
+      const [, orderId] = e.target.id.split('--');
+      orderDetails(orderId);
+    }
+  });
+};
+
+export { formEvents, cancelEvent };

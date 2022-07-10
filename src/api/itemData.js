@@ -15,7 +15,7 @@ const getOrderItems = (orderId) => new Promise((resolve, reject) => {
 
 const getSingleItem = (itemFbKey) => new Promise((resolve, reject) => {
   axios.get(`${dbUrl}/items/${itemFbKey}.json`)
-    .then((itemObj) => resolve(itemObj))
+    .then((itemObj) => resolve(itemObj.data))
     .catch((error) => reject(error));
 });
 
@@ -37,9 +37,16 @@ const createItem = (itemObj) => new Promise((resolve, reject) => {
     }).catch(reject);
 });
 
+const updateItem = (itemObj, firebaseKey) => new Promise((resolve, reject) => {
+  axios.patch(`${dbUrl}/items/${firebaseKey}.json`, itemObj)
+    .then(resolve)
+    .catch(reject);
+});
+
 export {
   getOrderItems,
   getSingleItem,
   deleteItem,
-  createItem
+  createItem,
+  updateItem
 };
